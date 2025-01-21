@@ -38,10 +38,11 @@ let merchants;
 let items;
 
 //Page load data fetching
-Promise.all([fetchData('merchants'), fetchData('items')])
+Promise.all([fetchData('merchants'), fetchData('items'), fetchData('coupons')])
 .then(responses => {
     merchants = responses[0].data
     items = responses[1].data
+    coupons = responses[2].data
     displayMerchants(merchants)
   })
   .catch(err => {
@@ -236,20 +237,45 @@ function getMerchantCoupons(event) {
   let merchantId = event.target.closest("article").id.split('-')[1]
   console.log("Merchant ID:", merchantId)
 
-  fetchData(`merchants/${merchantId}`)
+  fetchData(`merchants/${merchantId}/coupons`)
   .then(couponData => {
     console.log("Coupon data from fetch:", couponData)
-    displayMerchantCoupons(couponData);
+    displayMerchantCoupons(couponData, merchantId);
   })
 }
 
-function displayMerchantCoupons(coupons) {
+function displayMerchantCoupons(coupons, merchantId) {
+  couponsView.innerHTML = ''
   show([couponsView])
   hide([merchantsView, itemsView])
 
-  couponsView.innerHTML = `
-    <p>Coupon data will go here.</p>
-  `
+  let merchant = findMerchant(merchantId).attributes.name
+
+  coupons.data.forEach((coupon) => {
+    if (coupon.attributes.discount_type == "dollar_off") {
+      couponsView.innerHTML += `
+        <article class="coupon" id="coupon-${coupon.id}">
+          <img src="" alt="">
+          <h2>${coupon.attributes.name}</h2>
+          <p>${coupon.attributes.code}</p>
+          <p>$${coupon.attributes.discount_value}</p>
+          <p>Status: ${coupon.attributes.status}</p>
+          <p class="merchant-name-in-coupon">Merchant: ${merchant}</p>
+        </article>
+      `
+    } else {
+      couponsView.innerHTML += `
+        <article class="coupon" id="coupon-${coupon.id}">
+          <img src="" alt="">
+          <h2>${coupon.attributes.name}</h2>
+          <p>${coupon.attributes.code}</p>
+          <p>${coupon.attributes.discount_value}%</p>
+          <p>Status: ${coupon.attributes.status}</p>
+          <p class="merchant-name-in-item">Merchant: ${merchant}</p>
+        </article>
+      `
+    }
+  })
 }
 
 //Helper Functions

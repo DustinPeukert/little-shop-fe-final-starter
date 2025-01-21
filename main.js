@@ -245,9 +245,10 @@ function getMerchantCoupons(event) {
 }
 
 function displayMerchantCoupons(coupons, merchantId) {
-  couponsView.innerHTML = ''
   show([couponsView])
-  hide([merchantsView, itemsView])
+  hide([merchantsView, itemsView, addNewButton])
+  showingText.innerText = `All Coupons for Merchant #${merchantId}`
+  couponsView.innerHTML = ''
 
   let merchant = findMerchant(merchantId).attributes.name
 
